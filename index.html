@@ -1,0 +1,71 @@
+<html>
+<head>
+<title>MathCell</title>
+<link rel="stylesheet" type="text/css" href="docs/style.css">
+<meta name="google-site-verification" content="CF-4-ituiQgPq9WZpTcf5EYUTQhRrkZN0w9R6u6SmsE" />
+</head>
+
+<body>
+
+<p style="text-align: center; line-height: 2"><span style="font-size: 20pt">MathCell</span></p>
+
+<p style="text-align: center">
+<a href="docs/index.html">documentation</a> &middot;
+<a id="example" href="">this example</a>
+</p>
+
+<!-- use iframe to execute dynamically added script -->
+<iframe id="view" style="width: 100%; height: 4.5in; border: 0" scrolling="no"
+        onload="this.style.height=this.contentWindow.document.body.scrollHeight+50"></iframe>
+
+<script>
+
+var xhr = new XMLHttpRequest();
+
+xhr.open( 'GET', 'https://api.github.com/repos/paulmasson/mathcell/contents/docs/examples', true );
+
+xhr.onload = function() {
+
+  var files = JSON.parse( xhr.response );
+  var fileList = [];
+  for ( var i = 0 ; i < files.length ; i++ ) fileList.push( files[i].name );
+
+  var index = Math.floor( fileList.length * Math.random() );
+  example.href = 'docs/examples/' + fileList[index];
+
+  xhr.open( 'GET', example.href, true );
+
+  xhr.onload = function() {
+
+    var parser = new DOMParser();
+    var dom = parser.parseFromString( this.response, 'text/html' );
+    var cell = dom.getElementsByClassName( 'mathcell' )[0];
+
+    var math = this.response.includes( 'math.js' ) ? `
+<script src="../math/build/math.js"><\/script>` : '';
+
+    var mathjax = this.response.includes( 'mathjax' ) ? `
+<script src="https://cdn.jsdelivr.net/gh/mathjax/MathJax@2.7.5/MathJax.js?config=TeX-AMS_HTML"><\/script>` : '';
+
+    var view = document.getElementById( 'view' );
+    view.srcdoc = `
+<html>
+<body>
+<script src="build/mathcell.js"><\/script> ${math} ${mathjax}
+${cell.outerHTML}
+</body>
+</html>
+`;
+ 
+  }
+
+  xhr.send();
+
+}
+
+xhr.send();
+
+</script>
+
+</body>
+</html>
